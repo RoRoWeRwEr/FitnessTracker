@@ -426,7 +426,7 @@ function render() {
   const isToday = currentDateStr === todayStr();
   const diff = Math.round((date - today) / 86400000);
 
-  document.getElementById('headerDate').textContent = date.toLocaleDateString('ar-SA', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('headerDate').textContent =date.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   document.getElementById('dayLabel').textContent = isToday ? '— اليوم —' : (diff < 0 ? `منذ ${Math.abs(diff)} يوم` : `بعد ${diff} يوم`);
 
   // Day number from start
