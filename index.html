@@ -578,7 +578,7 @@ function renderHistory() {
     const cls = pct >= 80 ? 'great' : pct >= 50 ? 'ok' : 'bad';
     const emoji = pct >= 80 ? '🔥' : pct >= 50 ? '👍' : '⚠️';
     const note = dayData.note || '';
-    const dateLabel = date.toLocaleDateString('ar-SA', {weekday:'short', day:'numeric', month:'short'});
+    const dateLabel = date.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
     const el = document.createElement('div');
     el.className = `day-hist ${cls}`;
