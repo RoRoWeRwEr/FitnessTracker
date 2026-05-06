@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="متتبع اليوم">
+<meta name="theme-color" content="#f4f3ef">
+<title>متتبع اليوم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f3ef;--card:#fff;--card2:#faf9f6;--border:#e8e6e0;--border2:#d4d1c8;
+  --text:#1a1917;--text2:#5a574f;--text3:#9a9690;
+  --accent:#2d5016;--accent2:#4a7c28;--accent-light:#eef4e8;--accent-soft:#d4e8bc;
+  --danger:#c0392b;--danger-light:#fdf0ee;
+  --warn:#d4820a;--warn-light:#fef7ec;
+  --blue:#1e5fa8;--blue-light:#eef4fc;
+  --purple:#6b35a8;--purple-light:#f3eeff;
+  --tab-h:68px;--safe-bot:env(safe-area-inset-bottom,0px);
+  --r:14px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);font-family:'Tajawal',system-ui,sans-serif;color:var(--text);font-size:15px;line-height:1.5;overflow:hidden;}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--tab-h) + var(--safe-bot) + 16px);}
+/* TABBAR */
+#tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--tab-h) + var(--safe-bot));background:var(--card);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.06);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 2px;color:var(--text3);font-family:'Tajawal',system-ui;transition:color .2s;}
+.tab-btn .ti{font-size:22px;line-height:1;transition:transform .2s;}
+.tab-btn .tl{font-size:10px;font-weight:500;}
+.tab-btn.active{color:var(--accent);}
+.tab-btn.active .ti{transform:scale(1.15);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);margin:0 12px 10px;overflow:hidden;}
+/* SECTION HEADERS */
+.sh{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;border-bottom:1px solid var(--border);background:var(--card2);}
+.sh.collapsible{cursor:pointer;user-select:none;}
+.si{font-size:18px;line-height:1;flex-shrink:0;}
+.st{font-size:14px;font-weight:700;}
+.stm{font-size:11px;color:var(--text3);margin-right:auto;direction:ltr;}
+.chev{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+.sh.collapsed .chev{transform:rotate(-90deg);}
+.sb.collapsed{display:none;}
+/* BLOCK SCORE BADGE */
+.bsc{font-size:12px;font-weight:700;margin-right:auto;padding:2px 8px;border-radius:10px;}
+.bsc.full{background:var(--accent-light);color:var(--accent);}
+.bsc.part{background:var(--warn-light);color:var(--warn);}
+.bsc.none{background:var(--border);color:var(--text3);}
+/* CHECK ITEMS */
+.ci{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.ci:last-child{border-bottom:none;}
+.ci.dim{opacity:.32;pointer-events:none;}
+.in{flex:1;min-width:0;}
+.nm{font-size:14px;font-weight:500;line-height:1.3;}
+.ds{font-size:11px;color:var(--text3);margin-top:1px;}
+.bc{display:flex;gap:6px;flex-shrink:0;}
+.btn-yn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:none;font-size:16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;color:var(--text3);}
+.btn-yn.yes.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-yn.no.on{background:var(--danger);border-color:var(--danger);color:#fff;}
+.btn-yn:not(.on):active{transform:scale(.9);}
+.bdg{font-size:10px;background:var(--warn-light);color:var(--warn);border-radius:10px;padding:1px 6px;font-weight:600;display:inline-block;margin-top:2px;}
+/* GYM */
+.gym-sel{padding:12px 14px;display:flex;flex-wrap:wrap;gap:7px;}
+.gym-btn{padding:7px 13px;border-radius:20px;border:1.5px solid var(--border2);background:none;font-family:'Tajawal',system-ui;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--text2);}
+.gym-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+/* DAY HEADER + NAV */
+.dh{padding:12px 12px 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.nav-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2);background:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s;flex-shrink:0;}
+.nav-btn:active{background:var(--border);transform:scale(.92);}
+.nav-btn:disabled{opacity:.22;pointer-events:none;}
+.dh-center{flex:1;text-align:center;}
+.dt{font-size:17px;font-weight:800;line-height:1.2;}
+.dd{font-size:11px;color:var(--text3);margin-top:1px;}
+/* DAY STATUS BANNER */
+.day-banner{margin:0 12px 8px;border-radius:var(--rs);padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.day-banner.is-today{background:var(--accent-light);color:var(--accent);}
+.day-banner.is-yesterday{background:var(--warn-light);color:var(--warn);}
+.day-banner.is-past{background:var(--danger-light);color:var(--danger);}
+.day-banner.is-future{background:var(--blue-light);color:var(--blue);}
+/* READ-ONLY OVERLAY */
+.readonly-mask{pointer-events:none;opacity:.55;}
+.readonly-overlay{position:relative;}
+.readonly-overlay::after{content:'';position:absolute;inset:0;z-index:10;border-radius:var(--r);}
+/* DUAL SCORE */
+.ds-wrap{padding:0 12px 10px;}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.sl{font-size:11px;font-weight:700;color:var(--text3);width:54px;flex-shrink:0;}
+.st2{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.sf{height:100%;border-radius:4px;transition:width .4s ease;}
+.sf.ls{background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.sf.sp{background:linear-gradient(90deg,var(--blue),var(--purple));}
+.sp2{font-size:12px;font-weight:700;width:34px;flex-shrink:0;}
+.sp2.ls{color:var(--accent);}
+.sp2.sp{color:var(--blue);}
+/* FASTING */
+.fc{margin:0 12px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.fl{font-size:13px;font-weight:600;color:var(--text2);flex:1;}
+.fbs{display:flex;gap:7px;}
+.fb{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border2);background:none;font-family:'Tajawal',system-ui;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text2);}
+.fb.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+/* REVIEW */
+.rev-row{padding:12px 14px;display:flex;gap:10px;}
+.rb{flex:1;padding:10px;border-radius:var(--rs);border:1.5px solid var(--border2);background:none;font-family:'Tajawal',system-ui;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text2);}
+.rb.ok.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.rb.fail.on{background:var(--danger-light);border-color:var(--danger);color:var(--danger);}
+.nf{width:100%;border:none;outline:none;background:transparent;font-family:'Tajawal',system-ui;font-size:13px;color:var(--text);resize:none;min-height:50px;padding:10px 14px;line-height:1.6;}
+.nf::placeholder{color:var(--text3);}
+/* SUPP BANNER */
+.sb-banner{margin:12px 12px 0;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:var(--r);padding:16px;color:#fff;display:flex;align-items:center;gap:14px;}
+.sb-num{font-size:36px;font-weight:800;line-height:1;}
+.sb-lbl{font-size:14px;font-weight:700;opacity:.95;}
+.sb-sub{font-size:12px;opacity:.7;margin-top:2px;}
+/* STATS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 12px 0;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px;}
+.sn{font-size:26px;font-weight:800;color:var(--accent);line-height:1;}
+.slb{font-size:11px;color:var(--text3);font-weight:500;}
+/* STREAK */
+.sk{margin:10px 12px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:var(--r);padding:16px;color:#fff;display:flex;align-items:center;gap:14px;}
+.sk-n{font-size:40px;font-weight:800;line-height:1;}
+.sk-l{font-size:14px;font-weight:700;opacity:.95;}
+.sk-s{font-size:12px;opacity:.7;margin-top:2px;}
+/* CHARTS */
+.cw{padding:14px;}
+.ct{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;}
+.bc2{display:flex;align-items:flex-end;gap:3px;height:80px;}
+.bcc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bcf{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--accent2),var(--accent));min-height:3px;}
+.bcl{font-size:9px;color:var(--text3);}
+.lcs{width:100%;height:80px;}
+/* HISTORY */
+.hi{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.hi:last-child{border-bottom:none;}
+.hd{font-size:12px;color:var(--text3);min-width:72px;}
+.hp{font-size:15px;font-weight:700;color:var(--accent);min-width:38px;}
+.hsp{font-size:12px;font-weight:600;color:var(--blue);min-width:38px;}
+.hic{display:flex;gap:5px;flex:1;flex-wrap:wrap;}
+.htg{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;}
+.tok{background:var(--accent-light);color:var(--accent);}
+.tfl{background:var(--danger-light);color:var(--danger);}
+.tgm{background:var(--blue-light);color:var(--blue);}
+.tft{background:var(--purple-light);color:var(--purple);}
+.mh{padding:10px 14px 6px;font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.05em;background:var(--card2);border-bottom:1px solid var(--border);}
+/* PAGE HEADER */
+.ph{padding:14px 12px 4px;display:flex;align-items:center;justify-content:space-between;}
+.pt{font-size:20px;font-weight:800;}
+.ps{font-size:12px;color:var(--text3);margin-top:2px;}
+/* EXPORT */
+.exp-btn{display:block;width:calc(100% - 24px);margin:10px 12px;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:'Tajawal',system-ui;font-size:15px;font-weight:700;cursor:pointer;text-align:center;}
+.exp-btn:active{opacity:.85;}
+.s8{height:8px;}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="content">
+
+<!-- ══ TODAY TAB ══ -->
+<div id="tab-today" class="tab-pane active">
+
+  <div class="dh">
+    <button class="nav-btn" id="navPrev" onclick="navDay(-1)">&#8250;</button>
+    <div class="dh-center">
+      <div class="dt" id="todayTitle"></div>
+      <div class="dd" id="todayDate"></div>
+    </div>
+    <button class="nav-btn" id="navNext" onclick="navDay(1)">&#8249;</button>
+    <div id="todayEmoji" style="font-size:24px;flex-shrink:0;margin-right:2px;"></div>
+  </div>
+  <div id="dayBanner" class="day-banner" style="display:none;"></div>
+
+  <div class="ds-wrap">
+    <div class="sr">
+      <span class="sl">النمط</span>
+      <div class="st2"><div class="sf ls" id="lsFill" style="width:0%"></div></div>
+      <span class="sp2 ls" id="lsPct">٠٪</span>
+    </div>
+    <div class="sr">
+      <span class="sl">المكملات</span>
+      <div class="st2"><div class="sf sp" id="spFill" style="width:0%"></div></div>
+      <span class="sp2 sp" id="spPct">٠٪</span>
+    </div>
+  </div>
+
+  <div class="fc">
+    <span style="font-size:18px;">⏱</span>
+    <span class="fl">الصيام المتقطع</span>
+    <div class="fbs">
+      <button class="fb" data-v="16" onclick="setFast('16',this)">١٦ س</button>
+      <button class="fb" data-v="18" onclick="setFast('18',this)">١٨ س+</button>
+    </div>
+  </div>
+
+  <!-- MORNING -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('am',this)">
+      <span class="si">🌅</span><span class="st">الصباح</span>
+      <span class="stm">عند الاستيقاظ</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="am">
+      <div class="ci" id="ci-coffee">
+        <div class="in"><div class="nm">قهوة سوداء</div><div class="ds">بدون سكر أو حليب</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togLS('coffee','y',this)">✓</button><button class="btn-yn no" onclick="togLS('coffee','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-water">
+        <div class="in"><div class="nm">ماء كافٍ</div><div class="ds">هدف اليوم</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togLS('water','y',this)">✓</button><button class="btn-yn no" onclick="togLS('water','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOON -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('nn',this)">
+      <span class="si">☀️</span><span class="st">الظهر</span>
+      <span class="stm">١٢:٠٠</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="nn">
+      <div class="ci" id="ci-meal1">
+        <div class="in"><div class="nm">الوجبة الأولى</div><div class="ds">وجبة متوازنة مع دهون</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togLS('meal1','y',this)">✓</button><button class="btn-yn no" onclick="togLS('meal1','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('tr',this)">
+      <span class="si">🏋️</span><span class="st">التمرين</span>
+      <span class="stm">٥:٠٠ م</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="tr">
+      <div class="gym-sel">
+        <button class="gym-btn" data-g="res"  onclick="setGym('res',this)">💪 مقاومة</button>
+        <button class="gym-btn" data-g="car"  onclick="setGym('car',this)">🏃 كارديو</button>
+        <button class="gym-btn" data-g="both" onclick="setGym('both',this)">⚡ كلاهما</button>
+        <button class="gym-btn" data-g="rest" onclick="setGym('rest',this)">😴 راحة مجدولة</button>
+        <button class="gym-btn" data-g="none" onclick="setGym('none',this)">✗ لم أتمرن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENING -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('ev',this)">
+      <span class="si">🌆</span><span class="st">المساء</span>
+      <span class="stm">٨:٠٠ م</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="ev">
+      <div class="ci" id="ci-meal2">
+        <div class="in"><div class="nm">الوجبة الثانية</div><div class="ds">قبل ٩:٠٠ م</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togLS('meal2','y',this)">✓</button><button class="btn-yn no" onclick="togLS('meal2','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-close">
+        <div class="in"><div class="nm">إغلاق الأكل</div><div class="ds">قبل ٩:٠٠ م</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togLS('close','y',this)">✓</button><button class="btn-yn no" onclick="togLS('close','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW -->
+  <div class="card">
+    <div class="sh"><span class="si">📝</span><span class="st">مراجعة اليوم</span></div>
+    <div class="rev-row">
+      <button class="rb ok"   onclick="setRev('ok',this)">✓ يوم نظيف</button>
+      <button class="rb fail" onclick="setRev('fail',this)">✗ يوم غش</button>
+    </div>
+    <div id="cnw" style="display:none;border-top:1px solid var(--border);">
+      <textarea class="nf" id="rnf" placeholder="ملاحظة عن الغش..." rows="2" oninput="saveRN(this.value)"></textarea>
+    </div>
+    <div style="border-top:1px solid var(--border);">
+      <textarea class="nf" id="dnf" placeholder="ملاحظات اليوم..." rows="2" oninput="saveN(this.value)"></textarea>
+    </div>
+  </div>
+</div><!-- /today -->
+
+<!-- ══ SUPPLEMENTS TAB ══ -->
+<div id="tab-supp" class="tab-pane">
+
+  <div class="ph">
+    <div><div class="pt">المكملات</div><div class="ps" id="suppSub">تتبع يومي</div></div>
+    <span style="font-size:26px;">💊</span>
+  </div>
+
+  <div class="sb-banner">
+    <div class="sb-num" id="sbn">٠</div>
+    <div>
+      <div class="sb-lbl" id="sbl">/ ٠ مكمل اليوم</div>
+      <div class="sb-sub" id="sbp">٠٪ مكتمل</div>
+    </div>
+  </div>
+  <div class="s8"></div>
+
+  <!-- MORNING SUPPS -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('sm',this)">
+      <span class="si">🌅</span><span class="st">الصباح</span>
+      <span id="bsc-sm" class="bsc none">—</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="sm">
+      <div class="ci" id="ci-b12">
+        <div class="in"><div class="nm">Methyl B12</div><div class="ds">١٠٠٠ ميكروغرام — تحت اللسان، معدة فارغة</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('b12','y',this)">✓</button><button class="btn-yn no" onclick="togS('b12','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-gin">
+        <div class="in">
+          <div class="nm">Ginseng الكوري</div>
+          <div class="ds">١٠٦٥ ملغ — صائم قبل القهوة</div>
+          <span class="bdg">أح – خ فقط</span>
+        </div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('gin','y',this)">✓</button><button class="btn-yn no" onclick="togS('gin','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOON SUPPS -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('sn',this)">
+      <span class="si">☀️</span><span class="st">الظهر</span>
+      <span id="bsc-sn" class="bsc none">—</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="sn">
+      <div class="ci" id="ci-meds1">
+        <div class="in"><div class="nm">Glucophage</div><div class="ds">١٠٠٠ ملغ — مع الأكل</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('meds1','y',this)">✓</button><button class="btn-yn no" onclick="togS('meds1','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-omega3">
+        <div class="in"><div class="nm">Omega-3</div><div class="ds">٢ كبسولة — مع الدهون</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('omega3','y',this)">✓</button><button class="btn-yn no" onclick="togS('omega3','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-coq10">
+        <div class="in"><div class="nm">CoQ10 + BioPerine</div><div class="ds">٢٠٠ ملغ — مع الدهون</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('coq10','y',this)">✓</button><button class="btn-yn no" onclick="togS('coq10','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-vdk2">
+        <div class="in"><div class="nm">D3 + K2</div><div class="ds">١ كبسولة — مع الدهون</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('vdk2','y',this)">✓</button><button class="btn-yn no" onclick="togS('vdk2','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING SUPPS -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('st',this)">
+      <span class="si">🏋️</span><span class="st">التمرين</span>
+      <span id="bsc-st" class="bsc none">—</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="st">
+      <div class="ci" id="ci-carni">
+        <div class="in"><div class="nm">L-Carnitine</div><div class="ds">٢٠٠٠ ملغ — قبل التمرين</div><span class="bdg">أيام التمرين فقط</span></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('carni','y',this)">✓</button><button class="btn-yn no" onclick="togS('carni','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-whey">
+        <div class="in"><div class="nm">Whey Protein</div><div class="ds">٢٤ غرام — بعد التمرين</div><span class="bdg">أيام التمرين فقط</span></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('whey','y',this)">✓</button><button class="btn-yn no" onclick="togS('whey','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-creatine">
+        <div class="in"><div class="nm">Creatine</div><div class="ds">٥ غرام — يومياً</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('creatine','y',this)">✓</button><button class="btn-yn no" onclick="togS('creatine','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENING SUPPS -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('se',this)">
+      <span class="si">🌆</span><span class="st">المساء</span>
+      <span id="bsc-se" class="bsc none">—</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="se">
+      <div class="ci" id="ci-meds2">
+        <div class="in"><div class="nm">Glucophage</div><div class="ds">١٠٠٠ ملغ — مع الأكل</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('meds2','y',this)">✓</button><button class="btn-yn no" onclick="togS('meds2','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-berberine">
+        <div class="in"><div class="nm">Berberine Thorne</div><div class="ds">١ كبسولة — مع الأكل</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('berberine','y',this)">✓</button><button class="btn-yn no" onclick="togS('berberine','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-ash">
+        <div class="in"><div class="nm">Ashwagandha</div><div class="ds">٦٠٠ ملغ</div><span class="bdg">ج – س فقط</span></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('ash','y',this)">✓</button><button class="btn-yn no" onclick="togS('ash','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEDTIME SUPPS -->
+  <div class="card">
+    <div class="sh collapsible" onclick="togSec('sb2',this)">
+      <span class="si">🌙</span><span class="st">قبل النوم</span>
+      <span id="bsc-sb2" class="bsc none">—</span><span class="chev">▼</span>
+    </div>
+    <div class="sb" id="sb2">
+      <div class="ci" id="ci-roneza">
+        <div class="in"><div class="nm">Roneza</div><div class="ds">١١:٠٠ م — قبل النوم</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('roneza','y',this)">✓</button><button class="btn-yn no" onclick="togS('roneza','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-zma">
+        <div class="in"><div class="nm">ZMA</div><div class="ds">٢ كبسولة — معدة فارغة ١١:٣٠ م</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('zma','y',this)">✓</button><button class="btn-yn no" onclick="togS('zma','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-magnesium">
+        <div class="in"><div class="nm">Magnesium Bisglycinate</div><div class="ds">٢٠٠ ملغ — مع ZMA</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('magnesium','y',this)">✓</button><button class="btn-yn no" onclick="togS('magnesium','n',this)">✗</button></div>
+      </div>
+      <div class="ci" id="ci-tart">
+        <div class="in"><div class="nm">Tart Cherry</div><div class="ds">٨٠٠ ملغ — مع ZMA</div></div>
+        <div class="bc"><button class="btn-yn yes" onclick="togS('tart','y',this)">✓</button><button class="btn-yn no" onclick="togS('tart','n',this)">✗</button></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /supp -->
+
+<!-- ══ PROGRESS TAB ══ -->
+<div id="tab-progress" class="tab-pane">
+  <div class="ph"><div><div class="pt">التقدم</div><div class="ps">إحصائياتك التراكمية</div></div><span style="font-size:26px;">📈</span></div>
+
+  <div class="sk"><div class="sk-n" id="skN">٠</div><div><div class="sk-l">يوم متتالي</div><div class="sk-s" id="skS">ابدأ سلسلتك اليوم</div></div></div>
+
+  <div class="sg">
+    <div class="sc"><div class="sn" id="avgLs">٠٪</div><div class="slb">متوسط النمط</div></div>
+    <div class="sc"><div class="sn" id="avgSp" style="color:var(--blue);">٠٪</div><div class="slb">متوسط المكملات</div></div>
+    <div class="sc"><div class="sn" id="totD">٠</div><div class="slb">أيام مسجلة</div></div>
+    <div class="sc"><div class="sn" id="gymD">٠</div><div class="slb">أيام تمرين</div></div>
+    <div class="sc"><div class="sn" id="f18D">٠</div><div class="slb">صيام ١٨ ساعة</div></div>
+    <div class="sc"><div class="sn" id="clnD">٠</div><div class="slb">يوم نظيف</div></div>
+  </div>
+  <div class="s8"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px;">
+    <div class="sc" style="border-color:var(--accent-soft);">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px;">🏆 أفضل يوم</div>
+      <div class="sn" id="bstP" style="font-size:20px;">—</div><div style="font-size:11px;color:var(--text2);" id="bstD">—</div>
+    </div>
+    <div class="sc" style="border-color:#ffd0cc;">
+      <div style="font-size:10px;font-weight:700;color:var(--danger);margin-bottom:4px;">📉 أضعف يوم</div>
+      <div class="sn" id="wstP" style="font-size:20px;color:var(--danger);">—</div><div style="font-size:11px;color:var(--text2);" id="wstD">—</div>
+    </div>
+  </div>
+  <div class="s8"></div>
+  <div class="card"><div class="cw"><div class="ct">النمط — آخر ١٤ يوم</div><div class="bc2" id="barC"></div></div></div>
+  <div class="card"><div class="cw"><div class="ct">المسار الكلي للنمط</div><svg class="lcs" id="lineC" viewBox="0 0 360 80" preserveAspectRatio="none"></svg></div></div>
+  <button class="exp-btn" onclick="doExport()">⬇ تصدير CSV</button>
+</div><!-- /progress -->
+
+<!-- ══ HISTORY TAB ══ -->
+<div id="tab-history" class="tab-pane">
+  <div class="ph"><div><div class="pt">السجل</div><div class="ps">تاريخك الكامل</div></div><span style="font-size:26px;">📅</span></div>
+  <div id="histList" class="card"></div>
+</div>
+
+</div><!-- /content -->
+
+<!-- TABBAR -->
+<div id="tabbar">
+  <button class="tab-btn active" onclick="swTab('today',this)"><span class="ti">📋</span><span class="tl">اليوم</span></button>
+  <button class="tab-btn" onclick="swTab('supp',this)"><span class="ti">💊</span><span class="tl">المكملات</span></button>
+  <button class="tab-btn" onclick="swTab('progress',this)"><span class="ti">📈</span><span class="tl">التقدم</span></button>
+  <button class="tab-btn" onclick="swTab('history',this)"><span class="ti">📅</span><span class="tl">السجل</span></button>
+</div>
+</div><!-- /app -->
+
+<script>
+// ── CONSTANTS ──
+const STORE = 'fit_v5';
+const OLD   = 'fit_v4';
+const AR_D  = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const AR_M  = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+const LS = ['coffee','water','meal1','meal2','close'];
+const SBLOCKS = {
+  sm:  ['b12','gin'],
+  sn:  ['meds1','omega3','coq10','vdk2'],
+  st:  ['carni','whey','creatine'],
+  se:  ['meds2','berberine','ash'],
+  sb2: ['roneza','zma','magnesium','tart']
+};
+const ALL_S = Object.values(SBLOCKS).flat();
+const SUN_THU = ['gin'];
+const FRI_SAT = ['ash'];
+const TRAIN_ONLY = ['carni','whey'];
+const V4MAP = {gin:'gin',coffee:'coffee',water:'water',meal1:'meal1',meds1:'meds1',
+  carni:'carni',whey:'whey',meal2:'meal2',meds2:'meds2',ash:'ash',close:'close',zma:'zma'};
+
+// ── ACTIVE DATE STATE ──
+// activeKey = the date currently displayed in Today + Supp tabs
+let activeKey = null; // set in boot
+
+// ── UTILS ──
+const e2 = n => String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+
+function todayKey(){
+  const d=new Date();
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function offsetKey(k, delta){
+  const[y,m,d]=k.split('-').map(Number);
+  const nd=new Date(y,m-1,d+delta);
+  return`${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,'0')}-${String(nd.getDate()).padStart(2,'0')}`;
+}
+
+function daysDiff(k1,k2){
+  // k1 - k2 in days
+  const d1=new Date(k1),d2=new Date(k2);
+  return Math.round((d1-d2)/(1000*60*60*24));
+}
+
+function getDow(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d).getDay();}
+function fmtDate(k){const[y,m,d]=k.split('-').map(Number);const w=new Date(y,m-1,d).getDay();return`${AR_D[w]}، ${e2(d)} ${AR_M[m-1]}`;}
+function fmtShort(k){const[,m,d]=k.split('-').map(Number);return`${e2(d)}/${e2(m)}`;}
+
+// Day classification: 'today' | 'yesterday' | 'past' | 'future'
+function dayType(k){
+  const tk=todayKey(), diff=daysDiff(k,tk);
+  if(diff===0)return'today';
+  if(diff===-1)return'yesterday';
+  if(diff<0)return'past';
+  return'future';
+}
+
+// Can the active day be edited?
+function isEditable(k){
+  const t=dayType(k);
+  return t==='today'||t==='yesterday';
+}
+
+// ── DATA ──
+function load(){try{return JSON.parse(localStorage.getItem(STORE)||'{}');}catch{return{};}}
+function save(d){localStorage.setItem(STORE,JSON.stringify(d));}
+
+function getActiveObj(){
+  const data=load(),k=activeKey;
+  if(!data[k])data[k]={c:{},s:{},fasting:null,review:null,revNote:'',note:''};
+  if(!data[k].s)data[k].s={};
+  return{data,k};
+}
+// keep backward compat alias
+function getTodayObj(){ return getActiveObj(); }
+
+// ── MIGRATION ──
+function migrateV4(){
+  const raw=localStorage.getItem(OLD);if(!raw)return;
+  try{
+    const v4=JSON.parse(raw),v5=load();let n=0;
+    for(const[dk,day]of Object.entries(v4)){
+      if(v5[dk])continue;
+      const nd={c:{},s:{},fasting:day.fasting||null,review:day.review||null,revNote:day.revNote||'',note:day.note||''};
+      const c=day.c||{};
+      // lifestyle items
+      ['coffee','water','meal1','meal2','close'].forEach(id=>{if(c[id]!==undefined)nd.c[id]=c[id];});
+      if(c.gym_type)nd.c.gym_type=c.gym_type;
+      // supp items
+      for(const[ok,nk]of Object.entries(V4MAP)){
+        if(!['coffee','water','meal1','meal2','close'].includes(nk)&&c[ok]!==undefined)nd.s[nk]=c[ok];
+      }
+      v5[dk]=nd;n++;
+    }
+    if(n>0)save(v5);
+  }catch(e){}
+}
+
+// ── SCORING ──
+function lsScore(day,k){
+  const c=day.c||{};
+  let done=0,total=LS.length+2; // +2 for fasting+gym
+  LS.forEach(id=>{if(c[id]==='y')done++;});
+  if(day.fasting)done++;
+  if(c.gym_type)done++;
+  return{done,total,pct:Math.round((done/total)*100)};
+}
+
+function suppBlockScore(sObj,bid,k,gymType){
+  const dow=getDow(k),isTrain=['res','car','both'].includes(gymType);
+  const items=SBLOCKS[bid].filter(id=>{
+    if(SUN_THU.includes(id)&&!(dow<=4))return false;
+    if(FRI_SAT.includes(id)&&!(dow>=5))return false;
+    if(TRAIN_ONLY.includes(id)&&!isTrain)return false;
+    return true;
+  });
+  const done=items.filter(id=>sObj[id]==='y').length;
+  return{done,total:items.length,items};
+}
+
+function suppTotal(day,k){
+  const s=day.s||{},gt=day.c?.gym_type||null;
+  let done=0,total=0;
+  for(const bid of Object.keys(SBLOCKS)){const r=suppBlockScore(s,bid,k,gt);done+=r.done;total+=r.total;}
+  return{done,total,pct:total>0?Math.round((done/total)*100):0};
+}
+
+// ── NAVIGATION ──
+function navDay(delta){
+  const next=offsetKey(activeKey,delta);
+  const tk=todayKey();
+  const diff=daysDiff(next,tk);
+  // Future: max +2 days
+  if(diff>2)return;
+  activeKey=next;
+  renderActiveDay();
+}
+
+function renderActiveDay(){
+  const tk=todayKey();
+  const k=activeKey;
+  const diff=daysDiff(k,tk);
+  const data=load();
+  if(!data[k])data[k]={c:{},s:{},fasting:null,review:null,revNote:'',note:''};
+  if(!data[k].s)data[k].s={};
+  const day=data[k],c=day.c||{};
+  const dow=getDow(k);
+
+  // Header
+  document.getElementById('todayTitle').textContent=AR_D[dow];
+  const[y,m,d2]=k.split('-').map(Number);
+  document.getElementById('todayDate').textContent=`${e2(d2)} ${AR_M[m-1]} ${e2(y)}`;
+
+  // Nav arrow states
+  // RTL: نافذة ← right arrow (‹) goes forward in time, left arrow (›) goes back
+  document.getElementById('navNext').disabled=(diff>=2);  // can't go beyond +2
+  document.getElementById('navPrev').disabled=false;       // past is unlimited
+
+  // Banner
+  const banner=document.getElementById('dayBanner');
+  const type=dayType(k);
+  const bannerMap={
+    today:   {show:false},
+    yesterday:{show:true,cls:'is-yesterday',icon:'✏️',text:'تعديل يوم أمس'},
+    past:    {show:true,cls:'is-past',icon:'👁',text:'عرض فقط — '+fmtDate(k)},
+    future:  {show:true,cls:'is-future',icon:'📅',text:'يوم قادم — '+fmtDate(k)}
+  };
+  const bm=bannerMap[type];
+  if(bm.show){
+    banner.style.display='flex';
+    banner.className=`day-banner ${bm.cls}`;
+    banner.innerHTML=`<span>${bm.icon}</span><span>${bm.text}</span>`;
+  }else{
+    banner.style.display='none';
+  }
+
+  // Emoji (only meaningful for today)
+  const ls=lsScore(day,k);
+  const p=ls.pct;
+  document.getElementById('todayEmoji').textContent=
+    type==='today'?(p===100?'🌟':p>=80?'💪':p>=50?'👍':p>0?'⚡':'🎯'):'';
+
+  // Editable flag
+  const editable=isEditable(k);
+
+  // Reset all buttons first
+  ALL_BTNS_RESET();
+
+  // Restore lifestyle checks
+  LS.forEach(id=>{if(c[id])setBtn(id,c[id]);});
+
+  // Gym
+  document.querySelectorAll('.gym-btn').forEach(b=>b.classList.toggle('on',b.dataset.g===c.gym_type));
+
+  // Fasting
+  document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('on',b.dataset.v===day.fasting));
+
+  // Review
+  document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',b.classList.contains(day.review||'__')));
+  document.getElementById('cnw').style.display=(day.review==='fail')?'':'none';
+
+  // Notes
+  document.getElementById('dnf').value=day.note||'';
+  document.getElementById('rnf').value=day.revNote||'';
+
+  // Conditional dim
+  applyDim(dow,c.gym_type);
+
+  // Read-only enforcement
+  applyReadOnly(editable);
+
+  updScores();
+}
+
+function ALL_BTNS_RESET(){
+  // Clear all active states so switching days shows clean slate
+  document.querySelectorAll('.btn-yn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.gym-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.rb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('cnw').style.display='none';
+}
+
+function applyDim(dow,gymType){
+  const isTrain=['res','car','both'].includes(gymType);
+  document.getElementById('ci-gin').classList.toggle('dim',!(dow<=4));
+  document.getElementById('ci-ash').classList.toggle('dim',!(dow>=5));
+  // carni/whey dim handled in supp tab; lifestyle tab doesn't have them
+}
+
+function applyReadOnly(editable){
+  // Lifestyle interactive elements
+  const interactiveSelectors=[
+    '.btn-yn','.gym-btn','.fb','.rb','.nf'
+  ];
+  const todayPane=document.getElementById('tab-today');
+  interactiveSelectors.forEach(sel=>{
+    todayPane.querySelectorAll(sel).forEach(el=>{
+      el.disabled=!editable;
+      el.style.opacity=editable?'':'';
+    });
+  });
+  // Visual dimming on cards when read-only
+  todayPane.querySelectorAll('.card').forEach(c=>{
+    c.style.opacity=editable?'':'0.65';
+  });
+  todayPane.querySelector('.fc').style.opacity=editable?'':'0.65';
+}
+
+// ── INIT TODAY (called on boot + tab switch) ──
+function initToday(){
+  activeKey=todayKey();
+  renderActiveDay();
+}
+
+function setBtn(id,val){
+  const el=document.getElementById(`ci-${id}`);if(!el)return;
+  el.querySelector('.btn-yn.yes')?.classList.toggle('on',val==='y');
+  el.querySelector('.btn-yn.no')?.classList.toggle('on',val==='n');
+}
+
+function updScores(){
+  const k=activeKey,data=load(),day=data[k]||{c:{},s:{},fasting:null};
+  const ls=lsScore(day,k),sp=suppTotal(day,k);
+  document.getElementById('lsFill').style.width=ls.pct+'%';
+  document.getElementById('lsPct').textContent=e2(ls.pct)+'٪';
+  document.getElementById('spFill').style.width=sp.pct+'%';
+  document.getElementById('spPct').textContent=e2(sp.pct)+'٪';
+}
+function updEmoji(){
+  const k=activeKey,data=load(),p=lsScore(data[k]||{c:{},fasting:null},k).pct;
+  if(dayType(k)!=='today')return;
+  document.getElementById('todayEmoji').textContent=p===100?'🌟':p>=80?'💪':p>=50?'👍':p>0?'⚡':'🎯';
+}
+
+// ── INIT SUPP TAB ──
+function initSupp(){
+  const k=activeKey,data=load(),day=data[k]||{c:{},s:{},fasting:null};
+  const s=day.s||{},gt=day.c?.gym_type||null,dow=getDow(k);
+  const isTrain=['res','car','both'].includes(gt);
+  // Reset all supp buttons first
+  document.querySelectorAll('#tab-supp .btn-yn').forEach(b=>b.classList.remove('on'));
+  ALL_S.forEach(id=>{if(s[id])setSBtn(id,s[id]);});
+  // conditional dim
+  document.getElementById('ci-gin').classList.toggle('dim',!(dow<=4));
+  document.getElementById('ci-ash').classList.toggle('dim',!(dow>=5));
+  document.getElementById('ci-carni').classList.toggle('dim',!isTrain);
+  document.getElementById('ci-whey').classList.toggle('dim',!isTrain);
+  // block scores
+  for(const bid of Object.keys(SBLOCKS))updBlockScore(bid,s,k,gt);
+  // banner
+  const sp=suppTotal(day,k);
+  document.getElementById('sbn').textContent=e2(sp.done);
+  document.getElementById('sbl').textContent=`/ ${e2(sp.total)} مكمل اليوم`;
+  document.getElementById('sbp').textContent=e2(sp.pct)+'٪ مكتمل';
+  const[y,m,d2]=k.split('-').map(Number);
+  document.getElementById('suppSub').textContent=AR_D[dow]+' — '+e2(d2)+' '+AR_M[m-1];
+  // Read-only for supp tab too
+  const editable=isEditable(k);
+  document.querySelectorAll('#tab-supp .btn-yn').forEach(b=>{b.disabled=!editable;});
+  document.querySelectorAll('#tab-supp .card').forEach(c=>{c.style.opacity=editable?'':'0.65';});
+  document.querySelector('.sb-banner').style.opacity=editable?'':'0.75';
+}
+
+function setSBtn(id,val){
+  const el=document.getElementById(`ci-${id}`);if(!el)return;
+  el.querySelector('.btn-yn.yes')?.classList.toggle('on',val==='y');
+  el.querySelector('.btn-yn.no')?.classList.toggle('on',val==='n');
+}
+
+function updBlockScore(bid,s,k,gt){
+  const el=document.getElementById(`bsc-${bid}`);if(!el)return;
+  const{done,total}=suppBlockScore(s,bid,k,gt);
+  if(!total){el.textContent='—';el.className='bsc none';return;}
+  el.textContent=`${e2(done)}/${e2(total)}`;
+  el.className='bsc '+(done===total?'full':done>0?'part':'none');
+}
+
+function updSuppBanner(){
+  const k=activeKey,data=load(),day=data[k]||{c:{},s:{},fasting:null};
+  const sp=suppTotal(day,k);
+  document.getElementById('sbn').textContent=e2(sp.done);
+  document.getElementById('sbl').textContent=`/ ${e2(sp.total)} مكمل اليوم`;
+  document.getElementById('sbp').textContent=e2(sp.pct)+'٪ مكتمل';
+  document.getElementById('spFill').style.width=sp.pct+'%';
+  document.getElementById('spPct').textContent=e2(sp.pct)+'٪';
+}
+
+// ── INTERACTIONS ──
+function togLS(id,val,btn){
+  if(!isEditable(activeKey))return;
+  const{data,k}=getActiveObj();
+  data[k].c[id]=(data[k].c[id]===val)?null:val;
+  save(data);setBtn(id,data[k].c[id]);updScores();updEmoji();
+}
+
+function togS(id,val,btn){
+  if(!isEditable(activeKey))return;
+  const{data,k}=getActiveObj();
+  if(!data[k].s)data[k].s={};
+  data[k].s[id]=(data[k].s[id]===val)?null:val;
+  save(data);setSBtn(id,data[k].s[id]);
+  const gt=data[k].c?.gym_type||null;
+  for(const[bid,items]of Object.entries(SBLOCKS)){if(items.includes(id))updBlockScore(bid,data[k].s,k,gt);}
+  updSuppBanner();
+}
+
+function setGym(val,btn){
+  if(!isEditable(activeKey))return;
+  const{data,k}=getActiveObj();
+  data[k].c.gym_type=(data[k].c.gym_type===val)?null:val;
+  save(data);
+  document.querySelectorAll('.gym-btn').forEach(b=>b.classList.toggle('on',b.dataset.g===data[k].c.gym_type));
+  const isTrain=['res','car','both'].includes(data[k].c.gym_type);
+  document.getElementById('ci-carni').classList.toggle('dim',!isTrain);
+  document.getElementById('ci-whey').classList.toggle('dim',!isTrain);
+  if(!isTrain){TRAIN_ONLY.forEach(id=>{if(data[k].s)data[k].s[id]=null;setSBtn(id,null);});save(data);}
+  updScores();updEmoji();
+  const gt=data[k].c.gym_type;
+  for(const bid of Object.keys(SBLOCKS))updBlockScore(bid,data[k].s||{},k,gt);
+  updSuppBanner();
+}
+
+function setFast(val,btn){
+  if(!isEditable(activeKey))return;
+  const{data,k}=getActiveObj();
+  data[k].fasting=(data[k].fasting===val)?null:val;
+  save(data);document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('on',b.dataset.v===data[k].fasting));
+  updScores();updEmoji();
+}
+
+function setRev(val,btn){
+  if(!isEditable(activeKey))return;
+  const{data,k}=getActiveObj();
+  data[k].review=(data[k].review===val)?null:val;
+  save(data);document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',b.classList.contains(data[k].review||'__')));
+  document.getElementById('cnw').style.display=(data[k].review==='fail')?'':'none';
+}
+function saveRN(v){if(!isEditable(activeKey))return;const{data,k}=getActiveObj();data[k].revNote=v;save(data);}
+function saveN(v){if(!isEditable(activeKey))return;const{data,k}=getActiveObj();data[k].note=v;save(data);}
+
+function togSec(id,hdr){
+  hdr.classList.toggle('collapsed');
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ── TABS ──
+function swTab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  if(name==='today')renderActiveDay();
+  if(name==='supp')initSupp();
+  if(name==='progress')renderProgress();
+  if(name==='history')renderHistory();
+}
+
+// ── PROGRESS ──
+function renderProgress(){
+  const data=load(),keys=Object.keys(data).sort();
+  if(!keys.length)return;
+  const lsS=keys.map(k=>({k,pct:lsScore(data[k],k).pct}));
+  const spS=keys.map(k=>({k,pct:suppTotal(data[k],k).pct}));
+  const aLs=Math.round(lsS.reduce((s,d)=>s+d.pct,0)/lsS.length);
+  const aSp=Math.round(spS.reduce((s,d)=>s+d.pct,0)/spS.length);
+  document.getElementById('avgLs').textContent=e2(aLs)+'٪';
+  document.getElementById('avgSp').textContent=e2(aSp)+'٪';
+  document.getElementById('totD').textContent=e2(keys.length);
+  document.getElementById('gymD').textContent=e2(keys.filter(k=>['res','car','both'].includes(data[k].c?.gym_type)).length);
+  document.getElementById('f18D').textContent=e2(keys.filter(k=>data[k].fasting==='18').length);
+  document.getElementById('clnD').textContent=e2(keys.filter(k=>data[k].review==='ok').length);
+  const srt=[...lsS].sort((a,b)=>b.pct-a.pct);
+  document.getElementById('bstP').textContent=e2(srt[0].pct)+'٪';
+  document.getElementById('bstD').textContent=fmtDate(srt[0].k);
+  const w=srt[srt.length-1];
+  document.getElementById('wstP').textContent=e2(w.pct)+'٪';
+  document.getElementById('wstD').textContent=fmtDate(w.k);
+  document.getElementById('skN').textContent=e2(calcStreak(keys));
+  renderBars(lsS.slice(-14));renderLine(lsS);
+}
+
+function calcStreak(ascKeys){
+  const data=load(),today=todayKey(),keys=[...ascKeys].reverse();
+  let streak=0;
+  const decDay=k=>{const[y,m,d]=k.split('-').map(Number),p=new Date(y,m-1,d-1);return`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`;};
+  let exp=today;
+  for(const k of keys){
+    if(k>today)continue; // skip future days in streak calc
+    if(k!==exp)break;
+    if(lsScore(data[k],k).pct>=60)streak++;
+    else break;
+    exp=decDay(exp);
+  }
+  return streak;
+}
+
+function renderBars(scores){
+  const el=document.getElementById('barC');
+  if(!scores.length){el.innerHTML='<div class="empty">لا بيانات</div>';return;}
+  el.innerHTML=scores.map(d=>`<div class="bcc"><div class="bcf" style="height:${Math.round((d.pct/100)*70)}px"></div><div class="bcl">${fmtShort(d.k)}</div></div>`).join('');
+}
+
+function renderLine(scores){
+  const svg=document.getElementById('lineC');
+  if(scores.length<2){svg.innerHTML='';return;}
+  const W=360,H=80,p=8;
+  const pts=scores.map((d,i)=>{const x=p+(i/(scores.length-1))*(W-2*p),y=H-p-(d.pct/100)*(H-2*p);return`${x},${y}`;});
+  svg.innerHTML=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linejoin="round"/>${scores.map((_,i)=>{const[x,y]=pts[i].split(',');return`<circle cx="${x}" cy="${y}" r="2.5" fill="var(--accent)"/>`;}).join('')}`;
+}
+
+// ── HISTORY ──
+function renderHistory(){
+  const data=load(),keys=Object.keys(data).sort().reverse();
+  const el=document.getElementById('histList');
+  if(!keys.length){el.innerHTML='<div class="empty">📭 لا يوجد سجل بعد</div>';return;}
+  let html='',lastM='';
+  keys.forEach(k=>{
+    const[y,m,d]=k.split('-').map(Number),mn=`${AR_M[m-1]} ${e2(y)}`;
+    if(mn!==lastM){html+=`<div class="mh">${mn}</div>`;lastM=mn;}
+    const day=data[k],ls=lsScore(day,k).pct,sp=suppTotal(day,k).pct;
+    const gm=day.c?.gym_type,gl={res:'💪',car:'🏃',both:'⚡',rest:'😴',none:'✗'}[gm]||'';
+    const tags=[];
+    if(gl)tags.push(`<span class="htg tgm">${gl}</span>`);
+    if(day.fasting==='18')tags.push(`<span class="htg tft">١٨س</span>`);
+    if(day.review==='ok')tags.push(`<span class="htg tok">نظيف</span>`);
+    if(day.review==='fail')tags.push(`<span class="htg tfl">غش</span>`);
+    html+=`<div class="hi"><div class="hd">${AR_D[getDow(k)]}، ${e2(d)}</div><div class="hp">${e2(ls)}٪</div><div class="hsp">${e2(sp)}٪💊</div><div class="hic">${tags.join('')}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ── EXPORT ──
+function doExport(){
+  const data=load(),keys=Object.keys(data).sort();
+  const hdr=['التاريخ','النمط٪','المكملات٪','الصيام','التمرين','المراجعة','ملاحظات'];
+  const rows=keys.map(k=>{
+    const d=data[k],ls=lsScore(d,k).pct,sp=suppTotal(d,k).pct;
+    const gm={res:'مقاومة',car:'كارديو',both:'كلاهما',rest:'راحة',none:'لم أتمرن'}[d.c?.gym_type]||'';
+    return[k,ls+'%',sp+'%',d.fasting||'',gm,d.review==='ok'?'نظيف':d.review==='fail'?'غش':'',(d.note||'').replace(/,/g,';')].join(',');
+  });
+  const blob=new Blob(['\uFEFF'+[hdr.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`fitness_${todayKey()}.csv`;a.click();URL.revokeObjectURL(url);
+}
+
+// ── SERVICE WORKER (offline-first, works on https + iOS Safari) ──
+const SW_SRC=`
+const CACHE='fit-v5-r1';
+const APP_SHELL=self.location.href;
+
+self.addEventListener('install',e=>{
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(c=>c.add(APP_SHELL).catch(()=>{})));
+});
+
+self.addEventListener('activate',e=>{
+  e.waitUntil(
+    caches.keys()
+      .then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.open(CACHE).then(async cache=>{
+      const cached=await cache.match(e.request);
+      const fetchPromise=fetch(e.request).then(res=>{
+        if(res&&res.status===200&&res.type!=='opaque'){cache.put(e.request,res.clone());}
+        return res;
+      }).catch(()=>cached);
+      return cached||fetchPromise;
+    })
+  );
+});
+`;
+
+function registerSW(){
+  if(!('serviceWorker' in navigator))return;
+  // Must be served over https or localhost for SW to work
+  if(location.protocol==='file:'){
+    console.info('SW: file:// protocol — open via https for offline support');
+    return;
+  }
+  try{
+    const blob=new Blob([SW_SRC],{type:'application/javascript'});
+    const blobUrl=URL.createObjectURL(blob);
+    navigator.serviceWorker.register(blobUrl,{scope:'./'})
+      .then(reg=>{console.log('SW ok',reg.scope);URL.revokeObjectURL(blobUrl);})
+      .catch(err=>{
+        URL.revokeObjectURL(blobUrl);
+        console.warn('SW blob failed, trying inline',err);
+        // Fallback via data URI (some browsers support this)
+        const encoded='data:application/javascript;charset=utf-8,'+encodeURIComponent(SW_SRC);
+        navigator.serviceWorker.register(encoded,{scope:'./'}).catch(()=>{});
+      });
+  }catch(e){console.warn('SW error',e);}
+}
+
+window.addEventListener('offline',()=>{});
+window.addEventListener('online',()=>{});
+
+// ── BOOT ──
+migrateV4();
+registerSW();
+activeKey = todayKey();
+initToday();
+</script>
+</body>
+</html>
